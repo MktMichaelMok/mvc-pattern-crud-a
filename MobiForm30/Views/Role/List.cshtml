@@ -1,0 +1,187 @@
+﻿@*@model IEnumerable<MobiForm30.Models.RoleViewModel>
+    @{
+        ViewBag.Title = "List";
+    }*@
+
+<h2>權限管理</h2>
+
+@Html.AntiForgeryToken()
+
+<div id="divTabset">
+    <ul>
+        <li><a href="#divList">查詢</a></li>
+        <li><a href="#divCreate">新增</a></li>
+        <li><a href="#divEdit">編輯</a></li>
+    </ul>
+
+    <div id="divList"> </div>
+    <div id="divCreate"> </div>
+    <div id="divEdit"> </div>
+   
+    <div id="divLoader" class="spinner" align="center" style="display: none;">   
+        <img id="img-spinner" src="@Url.Content("~/Content/3rdImages/ajax-loader.gif")" alt="Loading..." />
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        //====== List START ======
+        function dynaLoad_divList() {
+            document.getElementById("btnCreate").onclick = fnCreateRole;
+            function fnCreateRole() {
+                $($("#divTabset").find("li")[1]).show();
+                $("#divTabset").tabs({ active: 1 });
+                $.ajax({
+                    url: '@Url.Action("Create", "Role")',
+                    type: 'get',
+                    //dataType: 'json',
+                    data: {
+                    },
+                    cache: false,
+                    success: function (data) {
+                        $('#divCreate').html(data); // load the created page
+                        dynaLoad_divCreate();
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        ProcessError(xhr, ajaxOptions, thrownError);
+                    }
+                });
+            }          
+        }
+        //====== List End ======
+
+        //====== Create START ======
+        function dynaLoad_divCreate() {
+            document.getElementById("btnSave").onclick = fnCreateRole;
+            document.getElementById("btnCancelSave").onclick = fnBackToList;
+            function fnCreateRole() {
+                //for DataAnnotation purpose
+                $("createForm").removeAttr("novalidate");
+                $.validator.unobtrusive.parse("#createForm")
+                if (!$("#createForm").valid()) {
+                    return;
+                }
+                //
+                $.ajax({
+                    url: '@Url.Action("Create", "Role")',
+                    type: 'post',
+                    //dataType: 'json',
+                    data: {
+                        roleID: $('#create_RoleID').val(),
+                        roleName: $('#create_RoleName').val()
+                    },
+                    cache: false,
+                    success: function (data) {
+                        $('#divList').html(data);                        
+                        fnBackToList();
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        ProcessError(xhr, ajaxOptions, thrownError);                        
+                    }
+                });
+            }
+
+            function fnBackToList() {                
+                $($("#divTabset").find("li")[1]).hide();
+                $("#divTabset").tabs({ active: 0 });
+            }
+        }
+        //====== Create End ======
+
+        //====== Edit START ======
+        function dynaLoad_divEdit() {
+            document.getElementById("btnUpdate").onclick = fnUpdateRole;
+            document.getElementById("btnCancelUpdate").onclick = fnBackToList;
+            function fnUpdateRole() {
+                $("updateForm").removeAttr("novalidate");
+                $.validator.unobtrusive.parse("#updateForm")
+                if (!$("#updateForm").valid()) {
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("Edit", "Role")',
+                    type: 'post',
+                    //dataType: 'json',
+                    //contentType: "application/json; charset=utf-8",
+                    data: {
+                        roleSeq: $('#edit_RoleSeq').val(),
+                        roleID: $('#edit_RoleID').val(),
+                        roleName: $('#edit_RoleName').val()
+                    },
+                    cache: false,
+                    success: function (data) {
+                        $('#divList').html(data);
+                        dynaLoad_divList();
+                        fnBackToList();
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {                        
+                        ProcessError(xhr, ajaxOptions, thrownError);
+                    }
+                });
+            }
+
+            function fnBackToList() {
+                dynaLoad_divList();
+                $($("#divTabset").find("li")[2]).hide();
+                $("#divTabset").tabs({ active: 0 });
+            }
+        }
+        //====== Edit END ======
+       
+
+        //====== Main Page START ======
+        $(function () {
+            $("#divTabset").tabs();
+            $($("#divTabset").find("li")[1]).hide()
+            $($("#divTabset").find("li")[2]).hide()
+
+            $(document).ajaxStart(function () {                
+                $('#divLoader').show();
+            });
+
+            $(document).ajaxComplete(function () {
+                $('#divLoader').hide();                
+            });
+
+            $(document).ready(function () {                
+                $.ajax({
+                    url: '@Url.Action("ListPartial", "Role")',
+                    type: 'get',
+                    //dataType: 'json',                    
+                    data: {
+                    },
+                    cache: false,
+                    success: function (data) {                        
+                        $('#divList').html(data);                        
+                        dynaLoad_divList();
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        ProcessError(xhr, ajaxOptions, thrownError);
+                    }
+                });
+            });
+           
+        });
+        //====== Main Page END ======
+        
+        //====== Error Process ======
+        function ProcessError(xhr, ajaxOptions, thrownError) {
+            $("<div>" + xhr.statusText + "</div>").dialog({
+                title: "error",
+                resizable: false,
+                modal: true,
+                buttons: {
+                    "OK": function () { $(this).dialog("close"); }
+                }
+            });
+        }        
+
+    </script>
+
+    @Scripts.Render("~/bundles/jqueryval")
+    
+}

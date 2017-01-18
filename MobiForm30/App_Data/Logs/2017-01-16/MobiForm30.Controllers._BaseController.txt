@@ -1,0 +1,7 @@
+2017-01-16 15:39:00.8097 | TRACE | MobiForm30.Controllers._BaseController | 
+Error in Path : /Role/Edit
+Raw Url : /Role/Edit
+Function : MBFDB.UpdateRole
+Message : 1002 - DB update error
+ 
+

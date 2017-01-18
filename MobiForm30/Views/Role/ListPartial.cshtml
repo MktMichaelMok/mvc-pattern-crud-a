@@ -1,0 +1,114 @@
+﻿@model MvcPaging.IPagedList<MobiForm30.Models.RoleViewModel>
+@using MobiForm30.Lib;
+@{
+    ViewBag.Title = "ListPartial";
+    string SortCol = ViewBag.SortCol as string;
+    string SortType = ViewBag.SortType as string;
+    AjaxOptions ajaxOption = new AjaxOptions()
+    {
+        HttpMethod = "Get",
+        UpdateTargetId = "divList",
+        InsertionMode = InsertionMode.Replace,
+        OnSuccess = "dynaLoad_divList"
+    };
+}
+
+<input type="button" id="btnCreate" value="新增" />
+
+<div class="pager">
+    @(Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, ajaxOption)
+            .Options(r => r.AddRouteValue("SortCol", SortCol).AddRouteValue("SortType", SortType).Action("ListPartial")))
+    顯示 @Model.ItemStart - @Model.ItemEnd 筆 /共 @Model.TotalItemCount 筆資料
+</div>
+
+@{var m = Model.FirstOrDefault();}
+
+@*=== END ===*@
+
+
+
+@*<p></p>*@
+
+<table class="table">
+    <tr style="color: blue; background: silver;">
+        <th>
+            @Ajax.DisplaySortColumnStyle("RoleSeq", "序號", "ListPartial", ajaxOption)
+        </th>
+        <th>
+            @Ajax.DisplaySortColumnStyle("RoleID", "權限ID", "ListPartial", ajaxOption)
+        </th>
+        <th>
+            @*@Html.DisplayNameFor(model => model.RoleName)*@
+            @Ajax.DisplaySortColumnStyle("RoleName", "權限名稱", "ListPartial", ajaxOption)
+        </th>
+        <th style="width:500px;">
+            @*@Html.DisplayNameFor(model => model.UserNameList)*@
+            @Ajax.DisplaySortColumnStyle("UserNameList", "使用者", "ListPartial", ajaxOption)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model) {
+        <tr>
+            <td style="min-width:100px">
+                <font color="gray">
+                    @Html.DisplayFor(modelItem => item.RoleSeq)
+                </font>
+
+            </td>
+            <td style="min-width:120px">
+                @Html.DisplayFor(modelItem => item.RoleID)
+            </td>
+            <td style="min-width:120px">
+                @Html.DisplayFor(modelItem => item.RoleName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserNameList)
+            </td>
+            <td>
+                @*@Html.ActionLink("編輯", "Edit", new { id=item.RoleSeq }) |*@
+                @Ajax.ActionLink("編輯", "Edit", new { id = item.RoleSeq },
+                    new AjaxOptions {
+                        OnBegin = "$($('#divTabset').find('li')[2]).show(); " +
+                                    "$('#divTabset').tabs({ active: 2 });",
+                        HttpMethod = "Get",
+                        UpdateTargetId = "divEdit",
+                        InsertionMode = InsertionMode.Replace,
+                        OnSuccess = "dynaLoad_divEdit"
+                    }
+                    //new { @class = "glyphicon glyphicon-pencil" }
+                )
+                |
+                @Ajax.ActionLink("刪除", "Delete", new { id = item.RoleSeq },
+                    new AjaxOptions() {
+                        OnBegin = "return confirm('確定刪除嗎?');",
+                        HttpMethod = "Get",
+                        UpdateTargetId = "divList",
+                        InsertionMode = InsertionMode.Replace,
+                        OnSuccess = "dynaLoad_divList",
+                        OnFailure = "ProcessError"
+                    }
+                    //new { @class = "glyphicon glyphicon-trash" }
+                )
+            </td>
+        </tr>
+    }
+</table>
+
+
+
+
+
+@*@section Scripts
+{   
+    @Scripts.Render("~/bundles/jqueryval")
+}*@
+
+
+
+
+
+
+
+
+
